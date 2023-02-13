@@ -27,10 +27,10 @@ module Supabase.Supabase
   , signInWithOtp
   , signOut
   , single
+  , maybeSingle
   , update
   , upsert
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -122,10 +122,13 @@ else instance (YogaJson.ReadForeign output) => Equals FilterBuilder (Aff output)
 
 foreign import singleImpl :: FilterBuilder -> Effect (Promise Foreign)
 
---type ResultResponse d = { "data" :: Maybe d, status :: Int, error :: Maybe ResultError }
-
 single :: forall t. YogaJson.ReadForeign t => FilterBuilder -> Aff (Response t)
 single = singleImpl >>> Promise.toAffE >=> Util.fromJSON
+
+foreign import maybeSingleImpl :: FilterBuilder -> Effect (Promise Foreign)
+
+maybeSingle :: forall t. YogaJson.ReadForeign t => FilterBuilder -> Aff (Response t)
+maybeSingle = maybeSingleImpl >>> Promise.toAffE >=> Util.fromJSON
 
 foreign import rangeImpl :: forall i. i -> i -> FilterBuilder -> Effect (Promise Foreign)
 
@@ -170,14 +173,14 @@ foreign import getSessionImpl :: Client -> Effect (Promise Foreign)
 getSession :: Client -> Aff (Response SessionData)
 getSession client = getSessionImpl client # Promise.toAffE >>= Util.fromJSON
 
-type InternalFunctionResponse d = { "data" :: Nullable d, error :: Nullable { message :: String, context :: YogaJson.Core.Response}}
+type InternalFunctionResponse d = { "data" :: Nullable d, error :: Nullable { message :: String, context :: YogaJson.Core.Response } }
+
 foreign import invokeImpl :: forall body headers t. Client -> Fn3 String body headers (Effect $ Promise $ InternalFunctionResponse t)
 
-type FunctionResponse d = { "data" :: Maybe d, error :: Maybe { message :: String, context :: Fetch.Response}}
-
+type FunctionResponse d = { "data" :: Maybe d, error :: Maybe { message :: String, context :: Fetch.Response } }
 
 invoke ∷ forall t body headers. ReadForeign t ⇒ Client → String → body → headers → Aff (FunctionResponse t)
 invoke client fn body headers = runFn3 (invokeImpl client) fn body headers # Promise.toAffE <#> convert
   where
-    convertError { message, context } = { message, context: FetchInternalResponse.convert context}
-    convert { "data": d, error } = { "data": Nullable.toMaybe d, error: Nullable.toMaybe error <#> convertError} 
+  convertError { message, context } = { message, context: FetchInternalResponse.convert context }
+  convert { "data": d, error } = { "data": Nullable.toMaybe d, error: Nullable.toMaybe error <#> convertError }
