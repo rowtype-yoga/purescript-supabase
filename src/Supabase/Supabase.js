@@ -1,10 +1,3 @@
-import { supabaseClient } from "@supabase/auth-helpers-nextjs";
-
-// supabaseClient.from("bla")
-//   .select("wurst")
-//   .eq("", 1)
-//   .single()
-
 export const signInWithOtpImpl = (supabase) => (email) => () =>
   supabase.auth.signInWithOtp({ email });
 

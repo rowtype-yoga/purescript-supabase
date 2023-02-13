@@ -1,7 +1,4 @@
-import {
-  UserProvider,
-  useUser,
-} from "@supabase/auth-helpers-react";
+import { UserProvider, useUser } from "@supabase/auth-helpers-react";
 
 export const userProvider = UserProvider;
 export const useUserImpl = useUser;
