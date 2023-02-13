@@ -3,8 +3,7 @@ module Supabase.AuthHelpers
   , createBrowserClient
   , useUser
   , userProvider
-  )
-  where
+  ) where
 
 import Prelude
 
