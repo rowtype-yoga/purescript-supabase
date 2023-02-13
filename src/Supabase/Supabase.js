@@ -1,6 +1,5 @@
 import { supabaseClient } from "@supabase/auth-helpers-nextjs";
 
-
 // supabaseClient.from("bla")
 //   .select("wurst")
 //   .eq("", 1)
@@ -33,6 +32,9 @@ export const eqRunImpl = (builder) => (key, value) => () =>
 export const eqImpl = (builder) => (key, value) => builder.eq(key, value);
 
 export const singleImpl = (filterBuilder) => () => filterBuilder.single();
+
+export const maybeSingleImpl = (filterBuilder) => () =>
+  filterBuilder.maybeSingle();
 
 export const rangeImpl = (from) => (to) => (filterBuilder) => () =>
   filterBuilder.range(from, to);
