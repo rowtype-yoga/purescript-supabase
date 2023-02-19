@@ -80,10 +80,10 @@ foreign import fromImpl :: Client -> String -> QueryBuilder
 from ∷ String → Client -> QueryBuilder
 from s c = fromImpl c s
 
-foreign import upsertImpl :: QueryBuilder -> Foreign -> FilterBuilder
+foreign import upsertImpl :: QueryBuilder -> Foreign -> Effect (Promise Foreign)
 
-upsert ∷ ∀ (values ∷ Type). WriteForeign values => values → QueryBuilder → FilterBuilder
-upsert v q = upsertImpl q $ writeImpl v
+upsert ∷ ∀ (values ∷ Type) result. WriteForeign values => ReadForeign result => values → QueryBuilder → Aff (Response (Array result))
+upsert v q = (upsertImpl q $ writeImpl v) # Promise.toAffE >>= Util.fromJSON
 
 foreign import selectRunImpl :: forall input. FilterBuilder -> input -> Effect (Promise Foreign)
 
@@ -151,9 +151,9 @@ foreign import signOutImpl :: Client -> Effect (Promise Unit)
 signOut ∷ Client → Aff Unit
 signOut client = signOutImpl client # Promise.toAffE
 
-foreign import onAuthStateChangeImpl :: Client -> (EffectFn1 (Nullable Session) Unit) -> Effect Unit
+foreign import onAuthStateChangeImpl :: Client -> (EffectFn1 (Nullable Session) Unit) -> Effect { unsubscribe :: Effect Unit }
 
-onAuthStateChange ∷ Client → (Maybe Session → Effect Unit) → Effect Unit
+onAuthStateChange ∷ Client → (Maybe Session → Effect Unit) → Effect { unsubscribe :: Effect Unit }
 onAuthStateChange client handler = onAuthStateChangeImpl client $ mkEffectFn1 (Nullable.toMaybe >>> handler)
 
 type User = { id :: String, email :: String }
