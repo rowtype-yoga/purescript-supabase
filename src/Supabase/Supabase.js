@@ -31,8 +31,9 @@ export const maybeSingleImpl = (filterBuilder) => () =>
 
 export const rangeImpl = (from) => (to) => (filterBuilder) => () =>
   filterBuilder.range(from, to);
-export const upsertImpl = (queryBuilder) => (values) =>
-  queryBuilder.upsert(values);
+
+export const upsertImpl = (queryBuilder) => (values) => () =>
+  queryBuilder.upsert(values).select();
 
 export const selectRunImpl = (queryBuilder) => (input) => () =>
   queryBuilder.select(input);
