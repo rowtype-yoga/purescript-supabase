@@ -177,7 +177,7 @@ type InternalFunctionResponse d = { "data" :: Nullable d, error :: Nullable { me
 
 foreign import invokeImpl :: forall body headers t. Client -> Fn3 String body headers (Effect $ Promise $ InternalFunctionResponse t)
 
-type FunctionResponse d = { "data" :: Maybe d, error :: Maybe { message :: String, context :: Fetch.Response } }
+type FunctionResponse d = { "data" :: Maybe d, error :: Maybe { message :: String, context :: Fetch.Response }}
 
 invoke ∷ forall t body headers. ReadForeign t ⇒ Client → String → body → headers → Aff (FunctionResponse t)
 invoke client fn body headers = runFn3 (invokeImpl client) fn body headers # Promise.toAffE <#> convert
