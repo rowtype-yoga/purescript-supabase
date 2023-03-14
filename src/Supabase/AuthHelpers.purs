@@ -1,6 +1,7 @@
 module Supabase.AuthHelpers
   ( ClientOptions
   , CookieOptions
+  , Options
   , UseUser
   , createBrowserClient
   , createBrowserClientWithOptions
@@ -41,8 +42,15 @@ type CookieOptions =
   , secure :: Maybe Boolean
   }
 
+type Options =
+  { db :: Maybe String
+  }
+
 type ClientOptions =
   { cookieOptions :: Maybe CookieOptions
+  , options :: Maybe Options
+  , supabaseKey :: Maybe String
+  , supabaseUrl :: Maybe String
   }
 
 foreign import createBrowserClientWithOptionsInternal :: Foreign -> Effect Client
