@@ -3,6 +3,7 @@ module Supabase.Storage
   , Storage
   , download
   , from
+  , fromStorage
   , remove
   , storage
   , upload
@@ -36,6 +37,9 @@ foreign import fromImpl :: Storage -> String -> QueryBuilder
 
 from :: String -> Storage -> QueryBuilder
 from = flip fromImpl
+
+fromStorage :: String -> Client -> QueryBuilder
+fromStorage s = from s <<< storage
 
 type FileOptions = { upsert :: Boolean }
 
