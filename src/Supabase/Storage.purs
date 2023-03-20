@@ -6,6 +6,7 @@ module Supabase.Storage
   , remove
   , storage
   , upload
+  , createSignedUrl
   ) where
 
 import Prelude
@@ -26,6 +27,7 @@ import Type.Function (type ($))
 import Supabase.Util as Util
 import Web.File.Blob (Blob)
 import Web.File.File as File
+import Data.Time.Duration (Seconds)
 
 foreign import data Storage :: Type
 
@@ -57,3 +59,12 @@ foreign import removeImpl :: QueryBuilder -> Array String -> Effect (Promise For
 
 remove ∷ Array String → QueryBuilder → Aff { error ∷ Maybe ResultError }
 remove file qb = removeImpl qb file # Promise.toAffE >>= Util.fromJSON
+
+foreign import createSignedUrlImpl :: QueryBuilder -> String -> Seconds -> Effect (Promise { "data" :: Nullable { signedUrl :: String }, error :: Nullable ResultError })
+
+createSignedUrl :: String -> Seconds -> QueryBuilder -> Aff (SBTypes.Response { signedUrl :: String })
+createSignedUrl file expiry qb = createSignedUrlImpl qb file expiry # Promise.toAffE <#> convert
+  where
+  convert { "data": d, error: error } = do
+    let blob = Nullable.toMaybe d
+    { "data": blob, error: Nullable.toMaybe error, status: Nothing }

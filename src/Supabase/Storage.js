@@ -11,3 +11,6 @@ export const downloadImpl = (queryBuilder) => (filePath) => () =>
 
 export const removeImpl = (queryBuilder) => (filePaths) => () =>
   queryBuilder.remove(filePaths);
+
+export const createSignedUrlImpl = (queryBuilder) => filePath => options => () =>
+    queryBuilder.createSignedUrl(filePath, options);
