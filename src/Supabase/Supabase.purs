@@ -151,9 +151,9 @@ foreign import signOutImpl :: Client -> Effect (Promise Unit)
 signOut ∷ Client → Aff Unit
 signOut client = signOutImpl client # Promise.toAffE
 
-foreign import onAuthStateChangeImpl :: Client -> (EffectFn1 (Nullable Session) Unit) -> Effect Unit
+foreign import onAuthStateChangeImpl :: Client -> (EffectFn1 (Nullable Session) Unit) -> Effect { data :: { id :: String, unsubscribe :: Effect Unit } }
 
-onAuthStateChange ∷ Client → (Maybe Session → Effect Unit) → Effect Unit
+onAuthStateChange ∷ Client → (Maybe Session → Effect Unit) → Effect { data :: { id :: String, unsubscribe :: Effect Unit } }
 onAuthStateChange client handler = onAuthStateChangeImpl client $ mkEffectFn1 (Nullable.toMaybe >>> handler)
 
 type User = { id :: String, email :: String }
@@ -165,7 +165,10 @@ type ResultError = { code :: Maybe String, details :: Maybe String, message :: S
 type DataR d r = (data :: Maybe d | r)
 type ErrorR r = (error ∷ Maybe ResultError | r)
 type CountR r = (count :: Int | r)
+
+type StatusR :: forall k. k -> Row Type
 type StatusR r = (status ∷ Maybe Int)
+
 type Response d = { data :: Maybe d, error ∷ Maybe ResultError, status ∷ Maybe Int }
 
 foreign import getSessionImpl :: Client -> Effect (Promise Foreign)
@@ -177,7 +180,7 @@ type InternalFunctionResponse d = { "data" :: Nullable d, error :: Nullable { me
 
 foreign import invokeImpl :: forall body headers t. Client -> Fn3 String body headers (Effect $ Promise $ InternalFunctionResponse t)
 
-type FunctionResponse d = { "data" :: Maybe d, error :: Maybe { message :: String, context :: Fetch.Response }}
+type FunctionResponse d = { "data" :: Maybe d, error :: Maybe { message :: String, context :: Fetch.Response } }
 
 invoke ∷ forall t body headers. ReadForeign t ⇒ Client → String → body → headers → Aff (FunctionResponse t)
 invoke client fn body headers = runFn3 (invokeImpl client) fn body headers # Promise.toAffE <#> convert
