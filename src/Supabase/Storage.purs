@@ -50,8 +50,7 @@ download :: String -> QueryBuilder -> Aff (SBTypes.Response Blob) -- [TODO] Make
 download file qb = downloadImpl qb file # Promise.toAffE <#> convert
   where
   convert { "data": d, error: error } = do
-    let blob = Nullable.toMaybe d
-    { "data": blob, error: Nullable.toMaybe error, status: Nothing }
+    { "data": Nullable.toMaybe d, error: Nullable.toMaybe error, status: Nothing }
 
 foreign import removeImpl :: QueryBuilder -> Array String -> Effect (Promise Foreign)
 
@@ -64,5 +63,4 @@ createSignedUrl :: String -> Seconds -> QueryBuilder -> Aff (SBTypes.Response { 
 createSignedUrl file expiry qb = createSignedUrlImpl qb file expiry # Promise.toAffE <#> convert
   where
   convert { "data": d, error: error } = do
-    let blob = Nullable.toMaybe d
-    { "data": blob, error: Nullable.toMaybe error, status: Nothing }
+    { "data": Nullable.toMaybe d, error: Nullable.toMaybe error, status: Nothing }
