@@ -6,7 +6,6 @@ module Supabase.AuthHelpers
   , createBrowserClient
   , createBrowserClientWithOptions
   , useUser
-  , userProvider
   ) where
 
 import Prelude
@@ -16,13 +15,11 @@ import Data.Nullable (Nullable)
 import Data.Nullable as Nullable
 import Effect (Effect)
 import Foreign (Foreign)
-import React.Basic.Hooks (Hook, ReactComponent, unsafeHook)
+import React.Basic.Hooks (Hook, unsafeHook)
 import Record.Studio (mapRecordKind)
 import Supabase.Supabase as Supabase
 import Supabase.Types (Client)
 import Yoga.JSON as YogaJSON
-
-foreign import userProvider :: forall props. ReactComponent { supabaseClient :: Client | props }
 
 foreign import useUserImpl :: Effect { user :: Nullable Supabase.User }
 
