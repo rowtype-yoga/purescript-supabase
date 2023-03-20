@@ -3,6 +3,7 @@
   [ "aff"
   , "aff-promise"
   , "console"
+  , "datetime"
   , "effect"
   , "either"
   , "fetch"
