@@ -49,11 +49,9 @@ foreign import downloadImpl :: QueryBuilder -> String -> Effect (Promise { "data
 download :: String -> QueryBuilder -> Aff (SBTypes.Response Blob) -- [TODO] Make this a proper response
 download file qb = downloadImpl qb file # Promise.toAffE <#> convert
   where
-  convert { "data": d, error: error } =
-    let
-      blob = Nullable.toMaybe d
-    in
-      { "data": blob, error: Nullable.toMaybe error, status: Nothing }
+  convert { "data": d, error: error } = do
+    let blob = Nullable.toMaybe d
+    { "data": blob, error: Nullable.toMaybe error, status: Nothing }
 
 foreign import removeImpl :: QueryBuilder -> Array String -> Effect (Promise Foreign)
 
