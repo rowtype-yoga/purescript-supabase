@@ -91,7 +91,7 @@ foreign import selectQueryImpl :: QueryBuilder -> String -> FilterBuilder
 
 foreign import selectQueryWithCountImpl :: QueryBuilder -> String -> String -> FilterBuilder
 
-class Select input builder output where
+class Select input builder output | output -> builder where
   select :: input -> builder -> output
 
 instance (YogaJson.ReadForeign output) => Select Unit FilterBuilder (Aff output) where
