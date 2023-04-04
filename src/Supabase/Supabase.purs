@@ -12,6 +12,7 @@ module Supabase.Supabase
   , ResultError
   , Session
   , SessionData
+  , SignInOptions
   , StatusR
   , User
   , class Equals
@@ -21,13 +22,14 @@ module Supabase.Supabase
   , from
   , getSession
   , invoke
+  , maybeSingle
   , onAuthStateChange
   , range
   , select
   , signInWithOtp
+  , signInWithOtpOptions
   , signOut
   , single
-  , maybeSingle
   , update
   , upsert
   ) where
@@ -43,15 +45,16 @@ import Data.Nullable as Nullable
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, Error)
-import Effect.Uncurried (EffectFn1, mkEffectFn1)
+import Effect.Uncurried (EffectFn1, EffectFn3, mkEffectFn1, runEffectFn3)
 import Fetch as Fetch
 import Fetch.Core.Response as YogaJson.Core
 import Fetch.Internal.Response as FetchInternalResponse
 import Foreign (Foreign)
+import Prim.Row (class Union)
 import Supabase.Types (Client)
+import Supabase.Util as Util
 import Type.Function (type ($))
 import Type.Row (type (+))
-import Supabase.Util as Util
 import Yoga.JSON (class ReadForeign, class WriteForeign, write) as YogaJson
 import Yoga.JSON (class ReadForeign, class WriteForeign, writeImpl)
 
@@ -139,12 +142,22 @@ range { from: f, to } = rangeImpl f to >>> Promise.toAffE >=> Util.fromJSON
 
 type InternalAuthResponse = { error :: Nullable Error }
 
-foreign import signInWithOtpImpl :: Client -> String -> Effect (Promise InternalAuthResponse)
-
 type AuthResponse = { error :: Maybe Error }
+
+foreign import signInWithOtpImpl :: Client -> String -> Effect (Promise InternalAuthResponse)
 
 signInWithOtp :: Client -> String -> Aff AuthResponse
 signInWithOtp client email = signInWithOtpImpl client email # Promise.toAffE <#> \{ error } -> { error: Nullable.toMaybe error }
+
+type SignInOptions =
+  ( shouldCreateUser :: Boolean
+  , captchaToken :: String
+  )
+
+foreign import signInWithOtpOptionsImpl :: forall options. EffectFn3 Client String options (Promise InternalAuthResponse)
+
+signInWithOtpOptions :: forall options thru. Union options thru SignInOptions => Client -> String -> { | options } -> Aff AuthResponse
+signInWithOtpOptions client email options = runEffectFn3 signInWithOtpOptionsImpl client email options # Promise.toAffE <#> \{ error } -> { error: Nullable.toMaybe error }
 
 foreign import signOutImpl :: Client -> Effect (Promise Unit)
 
