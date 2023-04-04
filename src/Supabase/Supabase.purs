@@ -19,6 +19,7 @@ module Supabase.Supabase
   , class Select
   , delete
   , equals
+  , channel
   , from
   , getSession
   , invoke
@@ -26,6 +27,7 @@ module Supabase.Supabase
   , onAuthStateChange
   , range
   , select
+  , getUser
   , signInWithOtp
   , signInWithOtpOptions
   , signOut
@@ -39,7 +41,7 @@ import Prelude
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
 import Data.Nullable as Nullable
 import Data.Tuple (Tuple(..))
@@ -50,13 +52,14 @@ import Fetch as Fetch
 import Fetch.Core.Response as YogaJson.Core
 import Fetch.Internal.Response as FetchInternalResponse
 import Foreign (Foreign)
-import Prim.Row (class Union)
-import Supabase.Types (Client)
-import Supabase.Util as Util
+import Supabase.Types (Channel, ChannelName, Client)
 import Type.Function (type ($))
 import Type.Row (type (+))
+import Supabase.Util as Util
 import Yoga.JSON (class ReadForeign, class WriteForeign, write) as YogaJson
 import Yoga.JSON (class ReadForeign, class WriteForeign, writeImpl)
+import Data.Either (Either(..))
+import Effect.Exception (error)
 
 foreign import data QueryBuilder :: Type
 foreign import data FilterBuilder :: Type
@@ -142,9 +145,9 @@ range { from: f, to } = rangeImpl f to >>> Promise.toAffE >=> Util.fromJSON
 
 type InternalAuthResponse = { error :: Nullable Error }
 
-type AuthResponse = { error :: Maybe Error }
-
 foreign import signInWithOtpImpl :: Client -> String -> Effect (Promise InternalAuthResponse)
+
+type AuthResponse = { error :: Maybe Error }
 
 signInWithOtp :: Client -> String -> Aff AuthResponse
 signInWithOtp client email = signInWithOtpImpl client email # Promise.toAffE <#> \{ error } -> { error: Nullable.toMaybe error }
@@ -169,7 +172,7 @@ foreign import onAuthStateChangeImpl :: Client -> (EffectFn1 (Nullable Session) 
 onAuthStateChange ∷ Client → (Maybe Session → Effect Unit) → Effect { data :: { id :: String, unsubscribe :: Effect Unit } }
 onAuthStateChange client handler = onAuthStateChangeImpl client $ mkEffectFn1 (Nullable.toMaybe >>> handler)
 
-type User = { id :: String, email :: String }
+type User = { id :: String, email :: String, user_metadata :: Foreign }
 type Session = { user :: User }
 type SessionData = { session :: Maybe Session }
 
@@ -200,3 +203,15 @@ invoke client fn body headers = runFn3 (invokeImpl client) fn body headers # Pro
   where
   convertError { message, context } = { message, context: FetchInternalResponse.convert context }
   convert { "data": d, error } = { "data": Nullable.toMaybe d, error: Nullable.toMaybe error <#> convertError }
+
+foreign import channel :: ChannelName -> Client -> Effect Channel
+
+foreign import getUserImpl :: Client -> Effect (Promise { data :: Nullable User, error :: Nullable Error })
+getUser :: Client -> Aff (Either Error User)
+getUser client = do
+  res <- getUserImpl client # Promise.toAffE
+  case Nullable.toMaybe res.data, Nullable.toMaybe res.error of
+    Just user, _ -> pure $ Right user
+    _, Just error -> pure $ Left error
+    _, _ -> pure $ Left (error "Unexpected response error")
+

@@ -8,6 +8,8 @@ export const getSessionImpl = (supabase) => () => supabase.auth.getSession();
 export const onAuthStateChangeImpl = (supabase) => (handler) => () =>
   supabase.auth.onAuthStateChange((_event, session) => handler(session));
 
+export const getUserImpl = supabase => () => supabase.auth.getUser();
+
 export const signOutImpl = (supabase) => () => supabase.auth.signOut();
 export const fromImpl = (client) => (table) => client.from(table);
 export const selectQueryImpl = (queryBuilder) => (projection) =>
@@ -45,3 +47,5 @@ export const invokeImpl = (client) => (functionName, body, headers) => () =>
     body,
     headers,
   });
+
+export const channel = (channelName) => (client) => () => client.channel(channelName);
