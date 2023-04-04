@@ -1,6 +1,9 @@
 export const signInWithOtpImpl = (supabase) => (email) => () =>
   supabase.auth.signInWithOtp({ email });
 
+export const signInWithOtpOptionsImpl = (supabase, email, options) =>
+  supabase.auth.signInWithOtp({ email, options });
+
 export const getSessionImpl = (supabase) => () => supabase.auth.getSession();
 export const onAuthStateChangeImpl = (supabase) => (handler) => () =>
   supabase.auth.onAuthStateChange((_event, session) => handler(session));
