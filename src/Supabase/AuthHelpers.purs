@@ -20,6 +20,7 @@ import Record.Studio (mapRecordKind)
 import Supabase.Supabase as Supabase
 import Supabase.Types (Client)
 import Yoga.JSON as YogaJSON
+import Yoga.JSON (class WriteForeign)
 
 foreign import useUserImpl :: Effect { user :: Nullable Supabase.User }
 
@@ -43,14 +44,15 @@ type Options =
   { db :: Maybe String
   }
 
-type ClientOptions =
+type ClientOptions r =
   { cookieOptions :: Maybe CookieOptions
   , options :: Maybe Options
   , supabaseKey :: Maybe String
   , supabaseUrl :: Maybe String
+  | r
   }
 
 foreign import createBrowserClientWithOptionsInternal :: Foreign -> Effect Client
 
-createBrowserClientWithOptions ∷ ClientOptions → Effect Client
+createBrowserClientWithOptions ∷ forall r. WriteForeign (ClientOptions r) => ClientOptions r → Effect Client
 createBrowserClientWithOptions = YogaJSON.write >>> createBrowserClientWithOptionsInternal

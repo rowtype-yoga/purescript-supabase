@@ -6,6 +6,7 @@
   , "datetime"
   , "effect"
   , "either"
+  , "exceptions"
   , "fetch"
   , "fetch-core"
   , "foldable-traversable"
@@ -21,6 +22,9 @@
   , "transformers"
   , "tuples"
   , "typelevel-prelude"
+  , "unsafe-coerce"
+  , "unsafe-reference"
+  , "untagged-union"
   , "web-file"
   , "yoga-json"
   ]
