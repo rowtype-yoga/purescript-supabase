@@ -40,6 +40,7 @@ import Prelude
 
 import Control.Promise (Promise)
 import Control.Promise as Promise
+import Data.Either (Either(..))
 import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
@@ -47,15 +48,18 @@ import Data.Nullable as Nullable
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, Error)
+import Effect.Exception (error)
 import Effect.Uncurried (EffectFn1, EffectFn3, mkEffectFn1, runEffectFn3)
 import Fetch as Fetch
 import Fetch.Core.Response as YogaJson.Core
 import Fetch.Internal.Response as FetchInternalResponse
 import Foreign (Foreign)
 import Supabase.Types (Channel, ChannelName, Client)
+import Prim.Row (class Union)
+import Supabase.Types (Client)
+import Supabase.Util as Util
 import Type.Function (type ($))
 import Type.Row (type (+))
-import Supabase.Util as Util
 import Yoga.JSON (class ReadForeign, class WriteForeign, write) as YogaJson
 import Yoga.JSON (class ReadForeign, class WriteForeign, writeImpl)
 import Data.Either (Either(..))
@@ -145,9 +149,9 @@ range { from: f, to } = rangeImpl f to >>> Promise.toAffE >=> Util.fromJSON
 
 type InternalAuthResponse = { error :: Nullable Error }
 
-foreign import signInWithOtpImpl :: Client -> String -> Effect (Promise InternalAuthResponse)
-
 type AuthResponse = { error :: Maybe Error }
+
+foreign import signInWithOtpImpl :: Client -> String -> Effect (Promise InternalAuthResponse)
 
 signInWithOtp :: Client -> String -> Aff AuthResponse
 signInWithOtp client email = signInWithOtpImpl client email # Promise.toAffE <#> \{ error } -> { error: Nullable.toMaybe error }
@@ -207,6 +211,7 @@ invoke client fn body headers = runFn3 (invokeImpl client) fn body headers # Pro
 foreign import channel :: ChannelName -> Client -> Effect Channel
 
 foreign import getUserImpl :: Client -> Effect (Promise { data :: Nullable User, error :: Nullable Error })
+
 getUser :: Client -> Aff (Either Error User)
 getUser client = do
   res <- getUserImpl client # Promise.toAffE
