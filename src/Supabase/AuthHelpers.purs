@@ -21,7 +21,6 @@ import Supabase.Supabase as Supabase
 import Supabase.Types (Client)
 import Yoga.JSON as YogaJSON
 import Yoga.JSON (class WriteForeign)
-import Type.Prelude
 
 foreign import useUserImpl :: Effect { user :: Nullable Supabase.User }
 

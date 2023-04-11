@@ -39,31 +39,28 @@ module Supabase.Supabase
 import Prelude
 
 import Control.Promise (Promise)
-import Control.Promise as Promise
 import Data.Either (Either(..))
 import Data.Function.Uncurried (Fn2, Fn3, runFn2, runFn3)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
-import Data.Nullable as Nullable
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, Error)
 import Effect.Exception (error)
 import Effect.Uncurried (EffectFn1, EffectFn3, mkEffectFn1, runEffectFn3)
-import Fetch as Fetch
-import Fetch.Core.Response as YogaJson.Core
-import Fetch.Internal.Response as FetchInternalResponse
 import Foreign (Foreign)
-import Supabase.Types (Channel, ChannelName, Client)
 import Prim.Row (class Union)
-import Supabase.Types (Client)
-import Supabase.Util as Util
+import Supabase.Types (Channel, ChannelName, Client)
 import Type.Function (type ($))
 import Type.Row (type (+))
-import Yoga.JSON (class ReadForeign, class WriteForeign, write) as YogaJson
 import Yoga.JSON (class ReadForeign, class WriteForeign, writeImpl)
-import Data.Either (Either(..))
-import Effect.Exception (error)
+import Fetch as Fetch
+import Fetch.Internal.Response as FetchInternalResponse
+import Data.Nullable as Nullable
+import Control.Promise as Promise
+import Supabase.Util as Util
+import Yoga.JSON (class ReadForeign, class WriteForeign, write) as YogaJson
+import Fetch.Core.Response as YogaJson.Core
 
 foreign import data QueryBuilder :: Type
 foreign import data FilterBuilder :: Type
