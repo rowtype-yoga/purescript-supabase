@@ -29,6 +29,8 @@ export const eqRunImpl = (builder) => (key, value) => () =>
 
 export const eqImpl = (builder) => (key, value) => builder.eq(key, value);
 
+export const orImpl = conditions => builder => builder.or(...conditions);
+
 export const singleImpl = (filterBuilder) => () => filterBuilder.single();
 
 export const maybeSingleImpl = (filterBuilder) => () =>

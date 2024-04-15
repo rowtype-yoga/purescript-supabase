@@ -14,6 +14,7 @@ module Supabase.Supabase
   , SessionData
   , SignInOptions
   , StatusR
+  , class Or
   , User
   , class Equals
   , class Select
@@ -25,6 +26,7 @@ module Supabase.Supabase
   , invoke
   , maybeSingle
   , onAuthStateChange
+  , or
   , range
   , select
   , getUser
@@ -127,6 +129,18 @@ else instance (YogaJson.ReadForeign output) => Equals FilterBuilder (Aff output)
   equals :: String -> String -> FilterBuilder -> Aff output
   equals l r builder = runFn2 (eqRunImpl builder) l r # Promise.toAffE >>= Util.fromJSON
 
+foreign import orImpl :: forall builderIn builderOut. Array String -> builderIn -> builderOut
+
+class Or builder output | output -> builder where
+  or :: Array String -> builder -> output
+
+instance Or FilterBuilder FilterBuilder where
+  or :: Array String -> FilterBuilder -> FilterBuilder
+  or keys fb = orImpl keys fb
+else instance Or QueryBuilder FilterBuilder where
+  or :: Array String -> QueryBuilder -> FilterBuilder
+  or keys fb = orImpl keys fb
+
 foreign import singleImpl :: FilterBuilder -> Effect (Promise Foreign)
 
 single :: forall t. YogaJson.ReadForeign t => FilterBuilder -> Aff (Response t)
@@ -216,4 +230,3 @@ getUser client = do
     Just user, _ -> pure $ Right user
     _, Just error -> pure $ Left error
     _, _ -> pure $ Left (error "Unexpected response error")
-
